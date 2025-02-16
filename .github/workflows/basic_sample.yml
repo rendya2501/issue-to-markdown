@@ -26,7 +26,7 @@ jobs:
         run: |
           echo -e "${{ github.event.issue.body }}" | \
             sed -e "s/publishDate:/publishDate: $(TZ=-9 date -Iseconds)/" | \
-            sed -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" >> \
+            sed -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" > \
             content/${{ steps.define_title.outputs.title }}.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
