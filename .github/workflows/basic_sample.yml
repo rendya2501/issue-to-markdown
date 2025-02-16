@@ -7,21 +7,31 @@ on:
 
 jobs:
   publish:
+    # このジョブで利用する権限を指定
     permissions:
-      pull-requests: write # PR の作成・編集を許可
-      contents: write    # リポジトリのファイル編集を許可
-      issues: write       # Issue の編集を許可
+      pull-requests: write # PR の作成、編集、マージを許可
+      contents: write      # リポジトリ内のファイルの変更・プッシュを許可
+      issues: write        # Issue の編集（例: クローズ）を許可
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Issue に 'publish' ラベルが付与されているか確認
+      # 'publish' ラベルがなければ、以降の処理をスキップする      
       - name: Check issue labels
         if: contains(github.event.issue.labels.*.name, 'publish') != true
         run: exit 0
+
+      # Issue のタイトルからブランチ名用のタイトルを生成
+      # キャメルケース→ハイフン区切り、空白をハイフンに、すべて小文字に変換
       - name: Define title
         id: define_title
         run: |
           title=$(echo "${{ github.event.issue.title }}" | sed -r 's/([a-z0-9])([A-Z])/\1-\2/g; s/ /-/g' | tr '[A-Z]' '[a-z]')
           echo "title=$title" >> $GITHUB_OUTPUT
+
+      # Issue の本文を元にコンテンツファイルを作成
+      # publishDate と modDatetime のプレースホルダーを現在の日時に置換して出力
       - name: Create Content File
         run: |
           echo -e "${{ github.event.issue.body }}" | \
@@ -30,19 +40,28 @@ jobs:
             content/${{ steps.define_title.outputs.title }}.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 生成したファイルをコミットし、新しいブランチとしてプッシュ
       - name: Commit Content File
         uses: EndBug/add-and-commit@v9
         with:
           new_branch: ${{ steps.define_title.outputs.title }}
+
+      # 新規ブランチからプルリクエストを作成
+      # タイトルは Issue のタイトル、本文は Issue 番号（参照用）
       - name: Create PullRequest
         run: gh pr create --title "${{ github.event.issue.title }}" --body "#${{ github.event.issue.number}}" --base main --head ${{ steps.define_title.outputs.title }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 作成したプルリクエストを自動でマージし、マージ後は使用済みブランチを削除
       - name: Auto Merge Pull Request
         run: |
           gh pr merge --merge --delete-branch ${{ steps.define_title.outputs.title }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # プルリクエストのマージ完了後、関連する Issue をクローズする
       - name: Close Issue
         run: gh issue close ${{ github.event.issue.number }}
         env:
