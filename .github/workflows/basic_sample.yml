@@ -7,6 +7,10 @@ on:
 
 jobs:
   publish:
+    permissions:
+      pull-requests: write # PR の作成・編集を許可
+      contents: write    # リポジトリのファイル編集を許可
+      issues: write       # Issue の編集を許可
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
