@@ -35,10 +35,10 @@ jobs:
       # publishDate と modDatetime のプレースホルダーを現在の日時に置換して出力
       - name: Create Content File
         run: |
-          printf "%s" "${{ github.event.issue.body }}" | \
+          cat <<< "${{ github.event.issue.body }}" > content/${{ steps.define_title.outputs.title }}.md
           sed -e "s/publishDate:/publishDate: $(TZ=-9 date -Iseconds)/" \
               -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" \
-          > content/${{ steps.define_title.outputs.title }}.md
+          >> content/${{ steps.define_title.outputs.title }}.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
