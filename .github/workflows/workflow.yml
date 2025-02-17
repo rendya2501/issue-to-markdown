@@ -34,13 +34,12 @@ jobs:
       # Issue の本文を元にコンテンツファイルを作成
       # publishDate と modDatetime のプレースホルダーを現在の日時に置換して出力
       - name: Create Content File
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           sed -e "s/publishDate:/publishDate: $(TZ=-9 date -Iseconds)/" \
               -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" <<< "$ISSUE_BODY" \
               > content/${{ steps.define_title.outputs.title }}.md
-          env:
-            ISSUE_BODY: ${{ github.event.issue.body }}
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       # 生成したファイルをコミットし、新しいブランチとしてプッシュ
       - name: Commit Content File
