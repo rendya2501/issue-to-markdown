@@ -41,8 +41,8 @@ jobs:
         run: |
           cat <<EOF | sed -e "s/publishDate:/publishDate: $(TZ=-9 date -Iseconds)/" \
                          -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/"
-$ISSUE_BODY
-EOF
+            $ISSUE_BODY
+            EOF
           > content/${{ steps.define_title.outputs.title }}.md
           
       # 生成したファイルをコミットし、新しいブランチとしてプッシュ
