@@ -33,16 +33,14 @@ jobs:
 
       # Issue の本文を元にコンテンツファイルを作成
       # publishDate と modDatetime のプレースホルダーを現在の日時に置換して出力
-      # ※echo -e ではなく、heredoc (cat <<EOF) を使用してマークダウン内のコードブロックをそのまま出力
-      # ※here-string を使い、heredoc のインデントによる問題を回避
       - name: Create Content File
-        env:
-          ISSUE_BODY: ${{ github.event.issue.body }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          printf "%s" "${{ github.event.issue.body }}" | \
           sed -e "s/publishDate:/publishDate: $(TZ=-9 date -Iseconds)/" \
-              -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" <<< "$ISSUE_BODY" \
-              > content/${{ steps.define_title.outputs.title }}.md
+              -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" \
+          > content/${{ steps.define_title.outputs.title }}.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       # 生成したファイルをコミットし、新しいブランチとしてプッシュ
       - name: Commit Content File
