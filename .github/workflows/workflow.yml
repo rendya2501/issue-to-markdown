@@ -36,10 +36,11 @@ jobs:
       - name: Create Content File
         run: |
           sed -e "s/publishDate:/publishDate: $(TZ=-9 date -Iseconds)/" \
-              -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" \ 
-              <<< "${{ github.event.issue.body }}" > content/${{ steps.define_title.outputs.title }}.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" <<< "$ISSUE_BODY" \
+              > content/${{ steps.define_title.outputs.title }}.md
+          env:
+            ISSUE_BODY: ${{ github.event.issue.body }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       # 生成したファイルをコミットし、新しいブランチとしてプッシュ
       - name: Commit Content File
