@@ -40,11 +40,8 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # ISSUE_BODY の内容を一時ファイルに出力
-          cat <<< "$ISSUE_BODY" > tmp.md
-          # sed で日付部分を置換し、最終的なファイルを生成
           sed -e "s/publishDate:/publishDate: $(TZ=-9 date -Iseconds)/" \
-              -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" tmp.md \
+              -e "s/modDatetime:/modDatetime: $(TZ=-9 date -Iseconds)/" <<< "$ISSUE_BODY" \
               > content/${{ steps.define_title.outputs.title }}.md
           
       # 生成したファイルをコミットし、新しいブランチとしてプッシュ
