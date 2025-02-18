@@ -56,8 +56,7 @@ jobs:
 
       # 作成したプルリクエストを自動でマージし、マージ後は使用済みブランチを削除
       - name: Auto Merge Pull Request
-        run: |
-          gh pr merge --merge --delete-branch ${{ steps.define_title.outputs.title }}
+        run: gh pr merge --merge --delete-branch ${{ steps.define_title.outputs.title }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
